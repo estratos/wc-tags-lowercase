@@ -14,14 +14,9 @@
     background-color: #ffb900;
 }
 
-.column-tag-lowercase {
-    width: 100px;
-}
-
 .button-convert-tag {
-    margin-top: 5px;
-    display: inline-block;
     margin-left: 10px;
+    display: inline-block;
 }
 
 .button-success {
@@ -34,4 +29,17 @@
     background-color: #dc3232;
     border-color: #dc3232;
     color: white;
+}
+
+/* Notice for converted tags */
+.notice-converted {
+    border-left-color: #46b450 !important;
+}
+
+/* Quick feedback for tag conversion */
+.tag-converted-message {
+    display: none;
+    color: #46b450;
+    font-weight: bold;
+    margin-top: 5px;
 }
