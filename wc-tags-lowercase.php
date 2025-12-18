@@ -3,7 +3,7 @@
  * Plugin Name: Convert Tags to Lowercase for WooCommerce
  * Plugin URI: https://yoursite.com/
  * Description: Automatically converts all WooCommerce product tags to lowercase
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Your Name
  * License: GPL v2 or later
  * Text Domain: wc-tags-lowercase
@@ -38,7 +38,14 @@ class WC_Tags_Lowercase {
         add_action('save_post_product', array($this, 'convert_product_tags'), 10, 3);
         add_action('woocommerce_update_product', array($this, 'convert_product_tags'));
         
-        // Hook to convert individual tags from quick edit
+        // Hook to convert tags when created/edited directly (FIXED)
+        add_action('created_product_tag', array($this, 'convert_single_term_on_save'), 10, 2);
+        add_action('edited_product_tag', array($this, 'convert_single_term_on_save'), 10, 2);
+        
+        // Hook to convert tags before they're saved (PRE SAVE - MOST IMPORTANT FIX)
+        add_filter('pre_insert_term', array($this, 'convert_term_before_save'), 10, 2);
+        
+        // Hook to convert individual tags from quick edit via AJAX
         add_action('wp_ajax_convert_tag_to_lowercase', array($this, 'convert_individual_tag'));
         
         // Hook for admin
@@ -54,9 +61,8 @@ class WC_Tags_Lowercase {
         // Hook for admin scripts and styles
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         
-        // Hook for converting tags when term is saved
-        add_action('created_product_tag', array($this, 'convert_single_term'), 10, 2);
-        add_action('edited_product_tag', array($this, 'convert_single_term'), 10, 2);
+        // Hook for inline edit save
+        add_action('wp_ajax_inline-save-tax', array($this, 'handle_inline_edit'), 1);
     }
     
     /**
@@ -79,12 +85,17 @@ class WC_Tags_Lowercase {
             return;
         }
         
+        // Skip auto-drafts and autosaves
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+        
         // Get current product tags
         $tags = wp_get_post_terms($post_id, 'product_tag', array('fields' => 'names'));
         
         if (!empty($tags) && !is_wp_error($tags)) {
             // Convert each tag to lowercase
-            $lowercase_tags = array_map('strtolower', $tags);
+            $lowercase_tags = array_map(array($this, 'strtolower_utf8'), $tags);
             
             // Remove old tags
             wp_remove_object_terms($post_id, $tags, 'product_tag');
@@ -95,17 +106,50 @@ class WC_Tags_Lowercase {
     }
     
     /**
-     * Convert a single term when saved
+     * UTF-8 safe strtolower function
      */
-    public function convert_single_term($term_id, $taxonomy) {
+    private function strtolower_utf8($string) {
+        if (function_exists('mb_strtolower')) {
+            return mb_strtolower($string, 'UTF-8');
+        }
+        return strtolower($string);
+    }
+    
+    /**
+     * Convert term before it's saved to database (MAIN FIX)
+     * This hook runs BEFORE the term is inserted/updated
+     */
+    public function convert_term_before_save($term, $taxonomy) {
+        // Only process product tags
         if ($taxonomy !== 'product_tag') {
-            return;
+            return $term;
         }
         
+        // If term is an array (from form submission)
+        if (is_array($term)) {
+            if (isset($term['tag-name'])) {
+                $term['tag-name'] = $this->strtolower_utf8($term['tag-name']);
+            }
+            if (isset($term['name'])) {
+                $term['name'] = $this->strtolower_utf8($term['name']);
+            }
+        }
+        // If term is a string (simple tag name)
+        elseif (is_string($term)) {
+            $term = $this->strtolower_utf8($term);
+        }
+        
+        return $term;
+    }
+    
+    /**
+     * Convert single term when saved (backup method)
+     */
+    public function convert_single_term_on_save($term_id, $tt_id) {
         $tag = get_term($term_id, 'product_tag');
         
         if ($tag && !is_wp_error($tag)) {
-            $new_name = strtolower($tag->name);
+            $new_name = $this->strtolower_utf8($tag->name);
             
             // Only update if different
             if ($tag->name !== $new_name) {
@@ -113,6 +157,18 @@ class WC_Tags_Lowercase {
                     'name' => $new_name,
                     'slug' => sanitize_title($new_name)
                 ));
+            }
+        }
+    }
+    
+    /**
+     * Handle inline edit saves
+     */
+    public function handle_inline_edit() {
+        // Check if this is for product_tag
+        if (isset($_POST['taxonomy']) && $_POST['taxonomy'] === 'product_tag') {
+            if (isset($_POST['name'])) {
+                $_POST['name'] = $this->strtolower_utf8($_POST['name']);
             }
         }
     }
@@ -126,6 +182,7 @@ class WC_Tags_Lowercase {
             'taxonomy' => 'product_tag',
             'hide_empty' => false,
             'fields' => 'all',
+            'number' => 0,
         ));
         
         if (is_wp_error($tags) || empty($tags)) {
@@ -136,15 +193,18 @@ class WC_Tags_Lowercase {
         
         foreach ($tags as $tag) {
             // Convert name to lowercase
-            $new_name = strtolower($tag->name);
+            $new_name = $this->strtolower_utf8($tag->name);
             
             // Only update if different
             if ($tag->name !== $new_name) {
-                wp_update_term($tag->term_id, 'product_tag', array(
+                $result = wp_update_term($tag->term_id, 'product_tag', array(
                     'name' => $new_name,
                     'slug' => sanitize_title($new_name)
                 ));
-                $updated++;
+                
+                if (!is_wp_error($result)) {
+                    $updated++;
+                }
             }
         }
         
@@ -167,19 +227,21 @@ class WC_Tags_Lowercase {
             $tag = get_term($tag_id, 'product_tag');
             
             if ($tag && !is_wp_error($tag)) {
-                $new_name = strtolower($tag->name);
+                $new_name = $this->strtolower_utf8($tag->name);
                 
-                wp_update_term($tag_id, 'product_tag', array(
+                $result = wp_update_term($tag_id, 'product_tag', array(
                     'name' => $new_name,
                     'slug' => sanitize_title($new_name)
                 ));
                 
-                wp_send_json_success(array(
-                    'message' => sprintf(
-                        __('Tag "%s" converted to lowercase successfully.', 'wc-tags-lowercase'),
-                        $new_name
-                    )
-                ));
+                if (!is_wp_error($result)) {
+                    wp_send_json_success(array(
+                        'message' => sprintf(
+                            __('Tag "%s" converted to lowercase successfully.', 'wc-tags-lowercase'),
+                            $new_name
+                        )
+                    ));
+                }
             }
         }
         
@@ -210,6 +272,17 @@ class WC_Tags_Lowercase {
         <div class="wrap">
             <h1><?php _e('Convert Tags to Lowercase', 'wc-tags-lowercase'); ?></h1>
             
+            <?php if (isset($_GET['converted']) && $_GET['converted'] > 0): ?>
+                <div class="notice notice-success is-dismissible">
+                    <p><?php 
+                    printf(
+                        __('Successfully converted %d tags to lowercase.', 'wc-tags-lowercase'),
+                        intval($_GET['converted'])
+                    ); 
+                    ?></p>
+                </div>
+            <?php endif; ?>
+            
             <div class="card">
                 <h2><?php _e('Convert All Tags', 'wc-tags-lowercase'); ?></h2>
                 <p><?php _e('This action will convert all existing product tags to lowercase.', 'wc-tags-lowercase'); ?></p>
@@ -230,14 +303,24 @@ class WC_Tags_Lowercase {
                 <ul>
                     <li><?php _e('When creating or editing a product', 'wc-tags-lowercase'); ?></li>
                     <li><?php _e('When updating a product', 'wc-tags-lowercase'); ?></li>
-                    <li><?php _e('When saving individual tags', 'wc-tags-lowercase'); ?></li>
+                    <li><?php _e('When adding new tags directly', 'wc-tags-lowercase'); ?></li>
+                    <li><?php _e('When editing existing tags', 'wc-tags-lowercase'); ?></li>
+                    <li><?php _e('When using inline edit', 'wc-tags-lowercase'); ?></li>
                 </ul>
             </div>
             
             <div class="card">
                 <h2><?php _e('Statistics', 'wc-tags-lowercase'); ?></h2>
                 <?php
-                $total_tags = wp_count_terms('product_tag');
+                $total_tags = wp_count_terms(array(
+                    'taxonomy' => 'product_tag',
+                    'hide_empty' => false
+                ));
+                
+                if (is_wp_error($total_tags)) {
+                    $total_tags = 0;
+                }
+                
                 $tags = get_terms(array(
                     'taxonomy' => 'product_tag',
                     'hide_empty' => false,
@@ -252,9 +335,10 @@ class WC_Tags_Lowercase {
                         echo '<h3>' . __('Some current tags:', 'wc-tags-lowercase') . '</h3>';
                         echo '<ul>';
                         foreach ($tags as $tag) {
-                            $is_lowercase = ($tag->name === strtolower($tag->name));
+                            $is_lowercase = ($tag->name === $this->strtolower_utf8($tag->name));
                             $style = $is_lowercase ? 'color:green;' : 'color:orange;';
-                            echo '<li><span style="' . $style . '">' . esc_html($tag->name) . '</span>';
+                            echo '<li>';
+                            echo '<span style="' . $style . '">' . esc_html($tag->name) . '</span>';
                             if (!$is_lowercase) {
                                 echo ' <button class="button button-small convert-tag-single" data-tag-id="' . $tag->term_id . '">' . __('Convert', 'wc-tags-lowercase') . '</button>';
                             }
@@ -264,6 +348,14 @@ class WC_Tags_Lowercase {
                     }
                 }
                 ?>
+            </div>
+            
+            <div class="card">
+                <h2><?php _e('Test the Plugin', 'wc-tags-lowercase'); ?></h2>
+                <p><?php _e('Try adding a new tag with uppercase letters to see the automatic conversion in action.', 'wc-tags-lowercase'); ?></p>
+                <a href="<?php echo admin_url('edit-tags.php?taxonomy=product_tag&post_type=product'); ?>" class="button">
+                    <?php _e('Go to Product Tags', 'wc-tags-lowercase'); ?>
+                </a>
             </div>
         </div>
         <?php
@@ -281,35 +373,12 @@ class WC_Tags_Lowercase {
             
             $updated = $this->convert_all_tags();
             
-            add_action('admin_notices', function() use ($updated) {
-                ?>
-                <div class="notice notice-success is-dismissible">
-                    <p><?php 
-                    printf(
-                        __('Successfully converted %d tags to lowercase.', 'wc-tags-lowercase'),
-                        $updated
-                    ); 
-                    ?></p>
-                </div>
-                <?php
-            });
-        }
-        
-        // Handle bulk action results
-        if (isset($_REQUEST['converted_lowercase'])) {
-            $count = intval($_REQUEST['converted_lowercase']);
-            add_action('admin_notices', function() use ($count) {
-                ?>
-                <div class="notice notice-success is-dismissible">
-                    <p><?php 
-                    printf(
-                        __('Successfully converted %d tags to lowercase.', 'wc-tags-lowercase'),
-                        $count
-                    ); 
-                    ?></p>
-                </div>
-                <?php
-            });
+            wp_redirect(add_query_arg(
+                'converted',
+                $updated,
+                admin_url('admin.php?page=wc-tags-lowercase')
+            ));
+            exit;
         }
     }
     
@@ -335,14 +404,17 @@ class WC_Tags_Lowercase {
             $tag = get_term($tag_id, 'product_tag');
             
             if ($tag && !is_wp_error($tag)) {
-                $new_name = strtolower($tag->name);
+                $new_name = $this->strtolower_utf8($tag->name);
                 
                 if ($tag->name !== $new_name) {
-                    wp_update_term($tag_id, 'product_tag', array(
+                    $result = wp_update_term($tag_id, 'product_tag', array(
                         'name' => $new_name,
                         'slug' => sanitize_title($new_name)
                     ));
-                    $updated++;
+                    
+                    if (!is_wp_error($result)) {
+                        $updated++;
+                    }
                 }
             }
         }
@@ -360,21 +432,20 @@ class WC_Tags_Lowercase {
      * Enqueue admin scripts and styles
      */
     public function enqueue_admin_scripts($hook) {
-        if ($hook === 'woocommerce_page_wc-tags-lowercase' || 
-            ($hook === 'edit-tags.php' && isset($_GET['taxonomy']) && $_GET['taxonomy'] === 'product_tag')) {
-            
+        // Load on our admin page
+        if ($hook === 'woocommerce_page_wc-tags-lowercase') {
             wp_enqueue_style(
                 'wc-tags-lowercase-admin',
                 plugin_dir_url(__FILE__) . 'assets/admin.css',
                 array(),
-                '1.0.0'
+                '1.1.0'
             );
             
             wp_enqueue_script(
                 'wc-tags-lowercase-admin',
                 plugin_dir_url(__FILE__) . 'assets/admin.js',
                 array('jquery'),
-                '1.0.0',
+                '1.1.0',
                 true
             );
             
@@ -388,6 +459,17 @@ class WC_Tags_Lowercase {
                     'error' => __('Error converting', 'wc-tags-lowercase')
                 )
             ));
+        }
+        
+        // Load on product tags page
+        if ($hook === 'edit-tags.php' && isset($_GET['taxonomy']) && $_GET['taxonomy'] === 'product_tag') {
+            wp_enqueue_script(
+                'wc-tags-lowercase-tags-page',
+                plugin_dir_url(__FILE__) . 'assets/tags-page.js',
+                array('jquery'),
+                '1.1.0',
+                true
+            );
         }
     }
 }
@@ -420,7 +502,20 @@ function wc_tags_lowercase_activate() {
     }
     
     // Optional: Convert all existing tags on activation
-    // (Comment if you don't want this functionality)
-    // $plugin = new WC_Tags_Lowercase();
-    // $plugin->convert_all_tags();
+    // Uncomment if you want this behavior
+    /*
+    $plugin = new WC_Tags_Lowercase();
+    $plugin->convert_all_tags();
+    */
 }
+
+// Add real-time conversion on tag add/update via AJAX
+add_action('wp_ajax_add-tag', function() {
+    // Check if this is for product_tag
+    if (isset($_POST['taxonomy']) && $_POST['taxonomy'] === 'product_tag') {
+        // Convert tag name to lowercase before processing
+        if (isset($_POST['tag-name'])) {
+            $_POST['tag-name'] = strtolower($_POST['tag-name']);
+        }
+    }
+}, 1);
