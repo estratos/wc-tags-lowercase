@@ -1,0 +1,122 @@
+# Spanish (Mexico) translations for Convert Tags to Lowercase for WooCommerce
+# Traducciones al español (México) para Convertir Etiquetas a Minúsculas para WooCommerce
+# Copyright (C) 2024 Your Name
+# This file is distributed under the same license as the Convert Tags to Lowercase for WooCommerce plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Convert Tags to Lowercase for WooCommerce 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\n"
+"PO-Revision-Date: 2024-01-01 00:00+0000\n"
+"Last-Translator: Your Name <you@example.com>\n"
+"Language-Team: Spanish (Mexico) <yourteam@example.com>\n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Poedit 3.0\n"
+
+#: wc-tags-lowercase.php:5
+msgid "Convert Tags to Lowercase for WooCommerce"
+msgstr "Convertir Etiquetas a Minúsculas para WooCommerce"
+
+#: wc-tags-lowercase.php:6
+msgid "Automatically converts all WooCommerce product tags to lowercase"
+msgstr "Convierte automáticamente todas las etiquetas de productos de WooCommerce a minúsculas"
+
+#: wc-tags-lowercase.php:10
+msgid "Your Name"
+msgstr "Tu Nombre"
+
+#: wc-tags-lowercase.php:114
+msgid "Tag \"%s\" converted to lowercase successfully."
+msgstr "Etiqueta \"%s\" convertida a minúsculas correctamente."
+
+#: wc-tags-lowercase.php:122
+msgid "Error converting the tag."
+msgstr "Error al convertir la etiqueta."
+
+#: wc-tags-lowercase.php:147
+msgid "Tags Lowercase"
+msgstr "Etiquetas Minúsculas"
+
+#: wc-tags-lowercase.php:154
+msgid "Convert Tags to Lowercase"
+msgstr "Convertir Etiquetas a Minúsculas"
+
+#: wc-tags-lowercase.php:160
+msgid "Convert All Tags"
+msgstr "Convertir Todas las Etiquetas"
+
+#: wc-tags-lowercase.php:161
+msgid "This action will convert all existing product tags to lowercase."
+msgstr "Esta acción convertirá todas las etiquetas de productos existentes a minúsculas."
+
+#: wc-tags-lowercase.php:166
+msgid "Are you sure you want to convert all tags to lowercase?"
+msgstr "¿Estás seguro de que deseas convertir todas las etiquetas a minúsculas?"
+
+#: wc-tags-lowercase.php:174
+msgid "Automatic Functionality"
+msgstr "Funcionalidad Automática"
+
+#: wc-tags-lowercase.php:175
+msgid "The plugin automatically converts to lowercase:"
+msgstr "El plugin convierte automáticamente a minúsculas:"
+
+#: wc-tags-lowercase.php:177
+msgid "When creating or editing a product"
+msgstr "Al crear o editar un producto"
+
+#: wc-tags-lowercase.php:178
+msgid "When updating a product"
+msgstr "Al actualizar un producto"
+
+#: wc-tags-lowercase.php:179
+msgid "When saving individual tags"
+msgstr "Al guardar etiquetas individualmente"
+
+#: wc-tags-lowercase.php:184
+msgid "Statistics"
+msgstr "Estadísticas"
+
+#: wc-tags-lowercase.php:191
+msgid "Total tags: %d"
+msgstr "Total de etiquetas: %d"
+
+#: wc-tags-lowercase.php:195
+msgid "Some current tags:"
+msgstr "Algunas etiquetas actuales:"
+
+#: wc-tags-lowercase.php:206
+msgid "Convert"
+msgstr "Convertir"
+
+#: wc-tags-lowercase.php:233
+msgid "Successfully converted %d tags to lowercase."
+msgstr "Se convirtieron %d etiquetas a minúsculas correctamente."
+
+#: wc-tags-lowercase.php:252
+msgid "Convert to lowercase"
+msgstr "Convertir a minúsculas"
+
+#: wc-tags-lowercase.php:296
+msgid "Converting..."
+msgstr "Convirtiendo..."
+
+#: wc-tags-lowercase.php:297
+msgid "Successfully converted"
+msgstr "Convertido correctamente"
+
+#: wc-tags-lowercase.php:298
+msgid "Error converting"
+msgstr "Error al convertir"
+
+#: wc-tags-lowercase.php:312
+msgid "The \"Convert Tags to Lowercase\" plugin requires WooCommerce to function."
+msgstr "El plugin \"Convertir Etiquetas a Minúsculas\" requiere WooCommerce para funcionar."
+
+#: wc-tags-lowercase.php:328
+msgid "This plugin requires WooCommerce. Please install and activate WooCommerce first."
+msgstr "Este plugin requiere WooCommerce. Por favor, instala y activa WooCommerce primero."
