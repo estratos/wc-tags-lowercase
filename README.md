@@ -147,3 +147,15 @@ add_filter('wc_tags_lowercase_skip_conversion', function($skip, $tag_name) {
     }
     return $skip;
 }, 10, 2);
+```
+
+## 🌐 Translation
+### Available Translations
+English (US) - Default, included
+
+Spanish (Mexico) - Included (es_MX)
+
+Translation Template - .pot file for creating new translations
+
+Adding New Translations
+Using Poedit (Recommended)
