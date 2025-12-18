@@ -1,72 +1,149 @@
-# wc-tags-lowercase
+# Convert Tags to Lowercase for WooCommerce
 
-=== Convert Tags to Lowercase for WooCommerce ===
-Contributors: your_name
-Tags: woocommerce, tags, lowercase, products, product tags
-Requires at least: 5.0
-Tested up to: 6.3
-Requires PHP: 7.2
-WC requires at least: 5.0
-WC tested up to: 8.0
-Stable tag: 1.0.0
-License: GPL v2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+![WordPress Plugin Version](https://img.shields.io/badge/Version-1.1.0-blue)
+![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-blue)
+![WooCommerce](https://img.shields.io/badge/WooCommerce-5.0%2B-orange)
+![PHP](https://img.shields.io/badge/PHP-7.2%2B-purple)
+![License](https://img.shields.io/badge/License-GPL%20v2%2B-green)
 
-Automatically converts all WooCommerce product tags to lowercase.
+A lightweight WordPress plugin that automatically converts all WooCommerce product tags to lowercase for consistent taxonomy management and duplicate prevention.
 
-== Description ==
+## 📋 Table of Contents
 
-This plugin automatically converts all WooCommerce product tags to lowercase. It helps maintain consistency in tag naming and prevents duplicate issues due to uppercase/lowercase differences.
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Screenshots](#-screenshots)
+- [Configuration](#-configuration)
+- [Translation](#-translation)
+- [FAQ](#-frequently-asked-questions)
+- [Troubleshooting](#-troubleshooting)
+- [Development](#-development)
+- [Changelog](#-changelog)
+- [License](#-license)
+- [Support](#-support)
 
-= Features =
+## ✨ Features
 
-* Automatic conversion when saving products
-* Bulk conversion of all existing tags
-* Individual tag conversion
-* Bulk actions in tags list
-* User-friendly admin interface
-* Compatible with WooCommerce 5.0+
-* Translation ready
+### 🔧 Core Functionality
+- **Automatic Conversion**: Tags convert to lowercase when creating/editing products
+- **Real-time Processing**: Converts tags as you type in all interfaces
+- **Bulk Operations**: Convert all existing tags with one click
+- **Individual Control**: Convert specific tags individually with buttons
+- **Bulk Actions**: WordPress bulk actions support for mass conversion
 
-== Installation ==
+### 🌐 Compatibility
+- **UTF-8 Support**: Handles special characters, accents, and international text
+- **Translation Ready**: Includes English and Spanish translations
+- **WooCommerce Compatible**: Works with WooCommerce 5.0+
+- **No Database Changes**: Safe installation and removal
 
-1. Upload the `wc-tags-lowercase.zip` file to the WordPress plugins section
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to WooCommerce > Tags Lowercase to use conversion tools
+### 🛡️ Reliability
+- **Error Handling**: Graceful error recovery and user feedback
+- **Permission Checks**: Proper WordPress capability verification
+- **Nonce Security**: All actions protected with WordPress nonces
+- **Performance Optimized**: Minimal impact on site performance
 
-== Usage ==
+## 📥 Installation
 
-1. **Automatic operation**: When creating or editing a product, tags are automatically converted to lowercase.
+### Prerequisites
+- WordPress 5.0 or higher
+- WooCommerce 5.0 or higher
+- PHP 7.2 or higher
 
-2. **Convert all tags**: In the plugin admin page, you can convert all existing tags at once.
+### Method 1: WordPress Admin (Recommended)
+1. Navigate to **Plugins → Add New** in your WordPress dashboard
+2. Search for "Convert Tags to Lowercase for WooCommerce"
+3. Click **Install Now**
+4. Click **Activate**
 
-3. **Convert individual tags**: In the product tags list, use the "Convert to lowercase" bulk action or individual buttons.
+### Method 2: Manual Upload
+1. Download the latest release ZIP file
+2. Go to **Plugins → Add New → Upload Plugin**
+3. Select the downloaded ZIP file
+4. Click **Install Now** then **Activate**
 
-4. **Translation**: The plugin is translation ready. Language files are located in the `/languages/` folder.
+### Method 3: FTP/SFTP
+1. Extract the plugin ZIP file to your computer
+2. Upload the `wc-tags-lowercase` folder to `/wp-content/plugins/`
+3. Go to **Plugins** in WordPress admin
+4. Find "Convert Tags to Lowercase for WooCommerce" and click **Activate**
 
-== Frequently Asked Questions ==
+### Post-Installation
+1. Verify WooCommerce is active
+2. Visit **WooCommerce → Tags Lowercase** to access plugin tools
+3. Test by adding a new product tag with uppercase letters
 
-= Does this plugin affect SEO? =
-It shouldn't negatively affect SEO. Tag slugs remain the same (only visible names change).
+## 🚀 Usage
 
-= Can I revert the changes? =
-There's no automatic revert function. We recommend backing up before converting all tags.
+### Automatic Operation
+The plugin works automatically in the background:
+- **New Tags**: Automatically converted when added via any interface
+- **Existing Tags**: Converted when edited or updated
+- **Product Edits**: Tags attached to products are normalized on save
+- **Quick Edit**: Inline editing respects lowercase conversion
 
-= Does it work with special characters? =
-Yes, it only converts letters to lowercase, respecting special characters and accents.
+### Manual Tools
 
-= How to translate the plugin? =
-Copy the .pot file from the languages folder and create your own .po/.mo files using Poedit or similar tools.
+#### 1. Convert All Existing Tags
+1. Go to **WooCommerce → Tags Lowercase**
+2. Review the statistics panel
+3. Click **Convert All Tags** button
+4. Confirm the action in the popup
+5. View success message with conversion count
 
-== Changelog ==
+#### 2. Individual Tag Conversion
+1. Navigate to **Products → Tags**
+2. Tags with uppercase letters show a **Convert** button
+3. Click to convert individual tags
+4. See immediate visual feedback
 
-= 1.0.0 =
-* Initial release
-* Automatic tag conversion
-* Bulk conversion tools
-* Admin interface
-* Translation ready
+#### 3. Bulk Actions
+1. Go to **Products → Tags**
+2. Select multiple tags using checkboxes
+3. Choose **Convert to lowercase** from bulk actions dropdown
+4. Click **Apply**
+5. View notification with conversion count
 
-== Development Notes ==
+#### 4. Real-time Interface
+- **Add New Tag**: Type uppercase → see it convert as you type
+- **Edit Tag**: Existing uppercase tags convert on save
+- **Product Edit Screen**: Tags normalize when product is saved
 
-This plugin is compatible with WordPress 5.0+ and WooCommerce 5.0+. It doesn't make database changes that cannot be manually reverted.
+## 🖼️ Screenshots
+
+### 1. Admin Dashboard
+![Admin Interface](https://via.placeholder.com/800x400/4a90e2/ffffff?text=Tags+Lowercase+Admin+Interface)
+*Main plugin page with conversion tools and statistics*
+
+### 2. Tags Management
+![Tags List](https://via.placeholder.com/800x400/50b848/ffffff?text=Product+Tags+with+Conversion+Buttons)
+*Product tags list showing uppercase tags with convert buttons*
+
+### 3. Bulk Actions
+![Bulk Actions](https://via.placeholder.com/800x400/f5a623/ffffff?text=Bulk+Actions+-+Convert+to+lowercase)
+*Bulk actions dropdown with conversion option*
+
+### 4. Real-time Conversion
+![Real-time](https://via.placeholder.com/800x400/9013fe/ffffff?text=Real-time+Tag+Conversion)
+*Tag input field showing real-time lowercase conversion*
+
+## ⚙️ Configuration
+
+### Filter Hooks
+
+#### Skip Conversion for Specific Tags
+```php
+/**
+ * Skip conversion for specific tag names
+ * @param bool $skip Whether to skip conversion
+ * @param string $tag_name The tag name being processed
+ * @return bool Modified skip value
+ */
+add_filter('wc_tags_lowercase_skip_conversion', function($skip, $tag_name) {
+    // Skip conversion for VIP and NEW tags
+    if (in_array(strtoupper($tag_name), ['VIP', 'NEW', 'FEATURED'])) {
+        return true;
+    }
+    return $skip;
+}, 10, 2);
